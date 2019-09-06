@@ -50,31 +50,31 @@ public class ArticleDetailActivity extends AppCompatActivity
     private int mCurrentPosition;
     private int mStartingPosition;
 
-    @SuppressWarnings("NewApi")
-    private final SharedElementCallback mCallback = new SharedElementCallback() {
-        @Override
-        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            if (mIsReturning) {
-
-                ImageView sharedElement = mCurrentDetailsFragment.getAlbumImage();
-                if (sharedElement == null) {
-                    // If shared element is null, then it has been scrolled off screen and
-                    // no longer visible. In this case we cancel the shared element transition by
-                    // removing the shared element from the shared elements map.
-                    names.clear();
-                    sharedElements.clear();
-                } else if (mStartingPosition != mCurrentPosition) {
-                    // If the user has swiped to a different ViewPager page, then we need to
-                    // remove the old shared element and replace it with the new shared element
-                    // that should be transitioned instead.
-                    names.clear();
-                    names.add(sharedElement.getTransitionName());
-                    sharedElements.clear();
-                    sharedElements.put(sharedElement.getTransitionName(), sharedElement);
-                }
-            }
-        }
-    };
+//    @SuppressWarnings("NewApi")
+//    private final SharedElementCallback mCallback = new SharedElementCallback() {
+//        @Override
+//        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+//            if (mIsReturning) {
+//
+//                ImageView sharedElement = mCurrentDetailsFragment.getAlbumImage();
+//                if (sharedElement == null) {
+//                    // If shared element is null, then it has been scrolled off screen and
+//                    // no longer visible. In this case we cancel the shared element transition by
+//                    // removing the shared element from the shared elements map.
+//                    names.clear();
+//                    sharedElements.clear();
+//                } else if (mStartingPosition != mCurrentPosition) {
+//                    // If the user has swiped to a different ViewPager page, then we need to
+//                    // remove the old shared element and replace it with the new shared element
+//                    // that should be transitioned instead.
+//                    names.clear();
+//                    names.add(sharedElement.getTransitionName());
+//                    sharedElements.clear();
+//                    sharedElements.put(sharedElement.getTransitionName(), sharedElement);
+//                }
+//            }
+//        }
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +86,6 @@ public class ArticleDetailActivity extends AppCompatActivity
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                             View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-
-            postponeEnterTransition();
-            setEnterSharedElementCallback(mCallback);
         }
 
         mStartingPosition = getIntent().getIntExtra(EXTRA_STARTING_ARTICLE_POSITION, 0);
@@ -110,12 +107,13 @@ public class ArticleDetailActivity extends AppCompatActivity
         mPager.setPageMargin((int) TypedValue
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
         mPager.setPageMarginDrawable(new ColorDrawable(0x22000000));
-
-        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+		mPager.setCurrentItem(mCurrentPosition);
+        mPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 if (mCursor != null) {
                     mCursor.moveToPosition(position);
+                    mCurrentPosition = position;
                 }
             }
         });
@@ -126,16 +124,6 @@ public class ArticleDetailActivity extends AppCompatActivity
         super.onSaveInstanceState(outState);
         outState.putLong(ARTICLE_ID, mStartId);
         outState.putInt(EXTRA_CURRENT_ARTICLE_POSITION, mCurrentPosition);
-    }
-
-    @Override
-    public void finishAfterTransition() {
-        mIsReturning = true;
-        Intent data = new Intent();
-        data.putExtra(EXTRA_STARTING_ARTICLE_POSITION, mStartingPosition);
-        data.putExtra(EXTRA_CURRENT_ARTICLE_POSITION, mCurrentPosition);
-        setResult(RESULT_OK, data);
-        super.finishAfterTransition();
     }
 
     @Override

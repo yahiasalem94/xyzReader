@@ -123,29 +123,11 @@ public class ArticleDetailFragment extends Fragment implements
             Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
 
-        mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
+        mPhotoView = (ImageView) mRootView.findViewById(R.id.thumbnail);
         mPhotoContainerView = mRootView.findViewById(R.id.photo_container);
 
         bindViews();
         return mRootView;
-    }
-
-    private void startPostponedEnterTransition() {
-        if (mCurrentPosition == mStartingPosition) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mPhotoView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        mPhotoView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            getActivity().startPostponedEnterTransition();
-                        }
-                        return true;
-                    }
-                });
-            }
-        }
-
     }
 
 
@@ -185,9 +167,7 @@ public class ArticleDetailFragment extends Fragment implements
             bylineView.setText(time);
             mPhotoView.setContentDescription(title + time);
             bodyView.setText(body);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mPhotoView.setTransitionName(getString(R.string.transition_photo) + String.valueOf(mCurrentPosition));
-            }
+
             mShareFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -203,9 +183,6 @@ public class ArticleDetailFragment extends Fragment implements
                     .get(photo, new ImageLoader.ImageListener() {
                         @Override
                         public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                startPostponedEnterTransition();
-                            }
 
                             Bitmap bitmap = imageContainer.getBitmap();
                             if (bitmap != null) {
@@ -222,6 +199,7 @@ public class ArticleDetailFragment extends Fragment implements
 
                         }
                     });
+
         } else {
             mRootView.setVisibility(View.GONE);
             titleView.setText("N/A");
@@ -271,26 +249,4 @@ public class ArticleDetailFragment extends Fragment implements
         }
         return super.onOptionsItemSelected(item);
     }
-
-    /**
-     * Returns the shared element that should be transitioned back to the previous Activity,
-     * or null if the view is not visible on the screen.
-     */
-    @Nullable
-    ImageView getAlbumImage() {
-        if (isViewInBounds(getActivity().getWindow().getDecorView(), mPhotoView)) {
-            return mPhotoView;
-        }
-        return null;
-    }
-
-    /**
-     * Returns true if {@param view} is contained within {@param container}'s bounds.
-     */
-    private static boolean isViewInBounds(@NonNull View container, @NonNull View view) {
-        Rect containerBounds = new Rect();
-        container.getHitRect(containerBounds);
-        return view.getLocalVisibleRect(containerBounds);
-    }
-
 }

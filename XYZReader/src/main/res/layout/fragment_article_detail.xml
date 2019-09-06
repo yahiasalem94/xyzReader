@@ -30,7 +30,8 @@
                 >
 
                 <ImageView
-                    android:id="@+id/photo"
+                    android:id="@+id/thumbnail"
+                    android:transitionName="@string/transition_photo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
